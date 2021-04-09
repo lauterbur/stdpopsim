@@ -105,7 +105,7 @@ class EnsemblRestClient:
         }
         chromosomes = {}
         for region in output["top_level_region"]:
-            if region["coord_system"] in ("chromosome", "primary_assembly"):
+            if region["coord_system"] in ("chromosome", "primary_assembly", "scaffold"):
                 synonyms = []
                 for record in region.get("synonyms", []):
                     # We're only interested in UCSC synonyms
@@ -116,9 +116,16 @@ class EnsemblRestClient:
                     "synonyms": synonyms,
                 }
         # Make sure the chromosomes are sorted by name
-        data["chromosomes"] = {
-            name: chromosomes[name]
-            for name in output["karyotype"]
-            if name in chromosomes
-        }
+        if not output["karyotype"]:
+            data["chromosomes"] = {
+                name: chromosomes[name]
+                for name in [*chromosomes]
+                if name in [*chromosomes]
+            }
+        else:
+            data["chromosomes"] = {
+                name: chromosomes[name]
+                for name in output["karyotype"]
+                if name in chromosomes
+            }
         return data
